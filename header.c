@@ -168,19 +168,14 @@ header_item_t *create_header_item(char *key, char *value) {
   if (!item) {
     return NULL;
   }
-  item->key = malloc(strlen(key));
-  if (!item->key) {
-    free(item);
-    return NULL;
-  }
-  strcpy(item->key, key);
-  item->value = malloc(strlen(value));
-  if (!item->value) {
+  item->key = strdup(key);
+  item->value = strdup(value);
+  if (!item->value || !item->key) {
     free(item->key);
+    free(item->value);
     free(item);
     return NULL;
   }
-  strcpy(item->value, value);
   return item;
 }
 
@@ -213,33 +208,59 @@ header_t *create_default_header() {
 }
 
 const char *serialize_header(header_t *header) {
-  char *output = malloc(BUFFER_SIZE);
+  size_t capacity = BUFFER_SIZE;
+  size_t len = 0;
+  char *output = malloc(capacity);
+  if (!output)
+    return NULL;
+  output[0] = '\0';
+
+#define APPEND(s)                                                              \
+  do {                                                                         \
+    size_t slen = strlen(s);                                                   \
+    if (len + slen + 1 > capacity) {                                           \
+      capacity = (len + slen + 1) * 2;                                         \
+      char *tmp = realloc(output, capacity);                                   \
+      if (!tmp) {                                                              \
+        free(output);                                                          \
+        return NULL;                                                           \
+      }                                                                        \
+      output = tmp;                                                            \
+    }                                                                          \
+    memcpy(output + len, s, slen);                                             \
+    len += slen;                                                               \
+    output[len] = '\0';                                                        \
+  } while (0)
   if (header->type == REQUEST) {
-    strcat(output, get_method_string(header->request_line->method));
-    strcat(output, SP);
-    strcat(output, header->request_line->target);
-    strcat(output, SP);
-    strcat(output, header->request_line->version);
-    strcat(output, LF);
+    APPEND(get_method_string(header->request_line->method));
+    APPEND(SP);
+    APPEND(header->request_line->target);
+    APPEND(SP);
+    APPEND(header->request_line->version);
+    APPEND(LF);
   } else if (header->type == RESPONSE) {
-    strcat(output, header->response_line->version);
-    strcat(output, SP);
-    char code[4]; // 3 digits + null terminator
+    APPEND(header->response_line->version);
+    APPEND(SP);
+    char code[4];
     snprintf(code, sizeof(code), "%d", header->response_line->code);
-    strcat(output, code);
-    strcat(output, SP);
-    strcat(output, get_response_code_string(header->response_line->code));
-    strcat(output, LF);
+    APPEND(code);
+    APPEND(SP);
+    APPEND(get_response_code_string(header->response_line->code));
+    APPEND(LF);
   }
+
   for (int i = 0; i < header->count; i++) {
-    strcat(output, header->items[i]->key);
-    strcat(output, ": ");
-    strcat(output, header->items[i]->value);
-    strcat(output, LF);
+    APPEND(header->items[i]->key);
+    APPEND(": ");
+    APPEND(header->items[i]->value);
+    APPEND(LF);
   }
-  strcat(output, CRLF);
-  strcat(output, CRLF);
-  return output;
+
+  APPEND(CRLF);
+  APPEND(CRLF);
+
+#undef APPEND
+  return output; // caller must free
 }
 
 header_response_line_t *create_response_line(RESPONSE_CODE_T code,

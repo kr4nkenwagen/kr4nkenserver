@@ -41,11 +41,21 @@ document_t *create_document(header_t *header, body_t *body) {
 
 const char *serialize_document(document_t *document) {
   const char *header = serialize_header(document->header);
-  char *output = calloc(BUFFER_SIZE, 1);
-  strcat(output, header);
-  if (get_header_item(document->header, "CONTENT-LENGTH")) {
-    const char *body = serialize_body(document->body);
-    strcat(output, body);
+  size_t header_len = strlen(header);
+  size_t body_len = 0;
+  const char *body_str = NULL;
+  header_item_t *cl = get_header_item(document->header, "CONTENT-LENGTH");
+  if (cl && document->body) {
+    body_str = serialize_body(document->body);
+    body_len = strlen(body_str);
   }
+  size_t total_len = header_len + body_len + 1; // +1 for '\0'
+  char *output = malloc(total_len);
+  if (!output)
+    return NULL;
+  memcpy(output, header, header_len);
+  if (body_str)
+    memcpy(output + header_len, body_str, body_len);
+  output[total_len - 1] = '\0';
   return output;
 }

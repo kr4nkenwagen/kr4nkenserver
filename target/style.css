@@ -1,0 +1,89 @@
+/* General page styling */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f2f2f2;
+    color: #333;
+}
+
+header {
+    background: #4a90e2;
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.subtitle {
+    font-size: 1.2em;
+    margin-top: 10px;
+    opacity: 0.9;
+}
+
+main {
+    padding: 20px;
+}
+
+/* Info box styling */
+.info-box {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 5px solid #4a90e2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Button styling */
+.primary-btn {
+    background: #4a90e2;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s ease;
+}
+
+.primary-btn:hover {
+    background: #357abd;
+}
+
+/* Card styling */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    max-width: 300px;
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #222;
+    color: white;
+    margin-top: 30px;
+}
+/* Confetti styling */
+.confetti {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    top: 0;
+    z-index: 9999;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: fall 1.5s ease-out forwards;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}

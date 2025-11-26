@@ -5,13 +5,13 @@
 #include <arpa/inet.h>
 #include <asm-generic/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <threads.h>
 #include <unistd.h>
 
 size_t str_to_size_t(const char *s) {
@@ -68,7 +68,12 @@ document_t *document_from_stream(int connfd) {
   header_t *header = NULL;
   document_t *document;
   while (!header_complete && (nread = read(connfd, buffer, BUFFER_SIZE)) > 0) {
-    raw_header = realloc(raw_header, raw_header_size + nread + 1);
+    void *tmp = realloc(raw_header, raw_header_size + nread + 1);
+    if (!tmp) {
+      free(raw_header);
+      return NULL;
+    }
+    raw_header = tmp;
     int header_end = -1;
     for (int i = 0; i < nread; i++) {
       if (rollover[0] == '\r' && rollover[1] == '\n' && rollover[2] == '\r' &&
@@ -104,27 +109,41 @@ document_t *document_from_stream(int connfd) {
         }
         body = parse_body((const char *)raw_body, body_size);
         free(raw_body);
-        free(raw_header);
       }
     }
   }
+  free(raw_header);
   return create_document(header, body);
 }
 
-int handle_conn(void *arg) {
-  int connfd = *(int *)arg;
-  free(arg);
-  printf("client (id:%d) connected\n", connfd);
-  document_t *request_document = document_from_stream(connfd);
-  const char *target =
-      fetch_body(request_document->header->request_line->target);
+void handle_GET(document_t *request, int connfd) {
+  const char *target = fetch_body(request->header->request_line->target);
 
-  body_t *response_body =
-      create_body(request_document->header->request_line->target);
+  body_t *response_body = create_body(request->header->request_line->target);
   document_t *response_document =
       create_response(response_body ? OK : NOT_FOUND, response_body);
   const char *response = serialize_document(response_document);
   write_to_conn(connfd, response);
+}
+
+void *handle_conn(void *arg) {
+  int connfd = *(int *)arg;
+  free(arg);
+  printf("client (id:%d) connected\n", connfd);
+  document_t *request_document = document_from_stream(connfd);
+  switch (request_document->header->request_line->method) {
+  case GET:
+    handle_GET(request_document, connfd);
+    break;
+  case POST:
+  case OPTIONS:
+  case HEAD:
+  case PUT:
+  case DELETE:
+  case TRACE:
+  case CONNECT:
+    break;
+  }
   close(connfd);
   printf("client(id:%d) disconnected\n", connfd);
   return EXIT_SUCCESS;
@@ -159,8 +178,8 @@ int server() {
     pthread_t tid;
     int *pconn = malloc(sizeof(int));
     *pconn = connfd;
-    thrd_create(&tid, handle_conn, pconn);
-    thrd_detach(tid);
+    pthread_create(&tid, NULL, handle_conn, pconn);
+    pthread_detach(tid);
   }
   return EXIT_SUCCESS;
 }

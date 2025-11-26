@@ -30,12 +30,12 @@ body_t *create_body(const char *target) {
     return NULL;
   }
   body->size = strlen(data);
-  body->data = malloc(body->size);
+  body->data = strdup(data);
   if (!body->data) {
     free(body);
     return NULL;
   }
-  strcpy(body->data, data);
   return body;
 }
+
 const char *serialize_body(body_t *body) { return body->data; }
