@@ -108,10 +108,10 @@ const char *get_response_code_string(RESPONSE_CODE_T code) {
 static header_request_line_t *parse_request_line(unsigned char *raw_header) {
   header_request_line_t *request_line = malloc(sizeof(header_request_line_t));
   int raw_header_index = 0;
-  while (raw_header[raw_header_index++] != '/') {
+  while (raw_header[raw_header_index++] != ' ') {
   }
-  char *method = malloc(raw_header_index);
-  strncpy(method, (char *)raw_header, raw_header_index - 2);
+  char *method = calloc(raw_header_index, 1);
+  strncpy(method, (char *)raw_header, raw_header_index - 1);
   if (strcmp(method, "GET") == 0) {
     request_line->method = GET;
   } else if (strcmp(method, "POST") == 0) {
@@ -121,16 +121,18 @@ static header_request_line_t *parse_request_line(unsigned char *raw_header) {
   int target_start = raw_header_index;
   while (raw_header[raw_header_index++] != ' ') {
   }
-  request_line->target = malloc(raw_header_index - target_start - 1);
+  request_line->target = calloc(raw_header_index - target_start - 1, 1);
   strncpy(request_line->target, (char *)raw_header + target_start,
           raw_header_index - target_start - 1);
   raw_header_index--;
   int protocol_start = raw_header_index + 1;
   while (raw_header[raw_header_index++] != '\n') {
   }
-  request_line->version = malloc(raw_header_index - protocol_start - 2);
+  request_line->version = calloc(raw_header_index - protocol_start - 2, 1);
   strncpy(request_line->version, (char *)raw_header + protocol_start,
           raw_header_index - 2 - protocol_start);
+  printf("%u %s %s\n", request_line->method, request_line->target,
+         request_line->version);
   return request_line;
 }
 
