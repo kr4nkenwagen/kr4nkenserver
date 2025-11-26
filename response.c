@@ -2,6 +2,7 @@
 #include "document.h"
 #include "header.h"
 #include <stdio.h>
+#include <string.h>
 
 static document_t *create_OK_document(body_t *body) {
   header_t *header = create_default_header();
@@ -127,12 +128,10 @@ static char *load_file(const char *filepath) {
 const char *fetch_body(const char *target) {
   char path[BUFFER_SIZE];
   snprintf(path, sizeof(path), "%s%s", TARGET_DIRECTORY, target);
-  char *content = load_file(path);
-  if (content) {
-    return content;
+  if (target[strlen(target) - 1] == '/') {
+    snprintf(path, sizeof(path), "%s%s/index.htm", TARGET_DIRECTORY, target);
   }
-  snprintf(path, sizeof(path), "%s%s/index.htm", TARGET_DIRECTORY, target);
-  content = load_file(path);
+  char *content = load_file(path);
   if (content) {
     return content;
   }
