@@ -129,7 +129,6 @@ static header_request_line_t *parse_request_line(unsigned char *raw_header) {
   request_line->version = calloc(raw_header_index - protocol_start - 2, 1);
   strncpy(request_line->version, (char *)raw_header + protocol_start,
           raw_header_index - 2 - protocol_start);
-  printf("%s\n", request_line->target);
   return request_line;
 }
 

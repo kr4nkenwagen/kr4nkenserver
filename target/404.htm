@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Welcome</title>
+<title>404 Not Found</title>
 
 <style>
   :root {
@@ -48,7 +48,7 @@
     font-family: "Inter", "Segoe UI", sans-serif;
     background: var(--bg);
     color: var(--fg);
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -57,11 +57,11 @@
   }
 
   .box {
-    max-width: 650px;
-    padding: 50px;
-    background: rgba(35, 55, 43, 0.28);
+    max-width: 500px;
+    padding: 40px;
+    background: rgba(35, 55, 43, 0.3); /* color0 w/ transparency */
     border: 1px solid var(--green);
-    border-radius: 14px;
+    border-radius: 12px;
     backdrop-filter: blur(6px);
     animation: fadeIn 0.8s ease forwards;
   }
@@ -72,37 +72,36 @@
   }
 
   h1 {
-    font-size: 3rem;
-    margin: 0 0 10px;
+    font-size: 4rem;
+    margin: 0;
     color: var(--cyan);
     font-weight: 700;
   }
 
   p {
-    font-size: 1.3rem;
-    margin: 0 0 30px;
-    color: var(--white);
+    font-size: 1.2rem;
+    margin: 10px 0 25px;
+    color: var(--fg);
   }
 
-  a.btn {
+  a {
     display: inline-block;
     color: var(--bg);
     background: var(--cyan);
-    padding: 14px 32px;
+    padding: 12px 26px;
     border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 1.05rem;
     transition: 0.25s ease;
   }
 
-  a.btn:hover {
+  a:hover {
     background: var(--cyan-bright);
     transform: translateY(-3px);
   }
 
   footer {
-    margin-top: 35px;
+    margin-top: 25px;
     font-size: 0.9rem;
     color: var(--black-bright);
   }
@@ -111,13 +110,12 @@
 
 <body>
   <div class="box">
-    <h1>Welcome</h1>
-    <p>This is home</p>
+    <h1>404</h1>
+    <p>Sorry, the page you're looking for doesn’t exist.</p>
 
-    <a href="/404.htm" class="btn">Visit 404 Page</a>
+    <a href="/">Go Home</a>
 
     <footer>kr4nkenserver</footer>
   </div>
 </body>
 </html>
-

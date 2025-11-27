@@ -25,7 +25,8 @@ static document_t *create_NOT_FOUND_document() {
   header_t *header = create_default_header();
   header->type = RESPONSE;
   header->response_line = create_response_line(NOT_FOUND, "HTTP/1.1");
-  document_t *document = create_document(header, NULL);
+  body_t *body = create_body("/404.htm");
+  document_t *document = create_document(header, body);
   return document;
 }
 
