@@ -39,11 +39,11 @@ document_t *create_document(header_t *header, body_t *body) {
   return document;
 }
 
-const char *serialize_document(document_t *document) {
-  const char *header = serialize_header(document->header);
+unsigned char *serialize_document(document_t *document) {
+  unsigned char *header = serialize_header(document->header);
   size_t header_len = strlen(header);
   size_t body_len = 0;
-  const char *body_str = NULL;
+  unsigned char *body_str = NULL;
   header_item_t *cl = get_header_item(document->header, "CONTENT-LENGTH");
   if (cl && document->body) {
     body_str = serialize_body(document->body);

@@ -111,7 +111,7 @@ header_t *parse_header(unsigned char *raw_header);
 header_item_t *get_header_item(header_t *header, char *name);
 header_item_t *create_header_item(char *key, char *value);
 header_t *create_default_header();
-const char *serialize_header(header_t *header);
+unsigned char *serialize_header(header_t *header);
 const char *get_response_code_string(RESPONSE_CODE_T code);
 void attach_header(header_t *header, header_item_t *item);
 header_response_line_t *create_response_line(RESPONSE_CODE_T code,

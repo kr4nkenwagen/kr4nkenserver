@@ -39,8 +39,12 @@ ssize_t read_full(int fd, unsigned char *buf, size_t count) {
   return total_read;
 }
 
-int write_to_conn(int connfd, const char *data) {
-  size_t remaining = strlen(data);
+int write_to_conn(int connfd, unsigned char *data) {
+
+  size_t remaining = 0;
+  while (data[remaining++] != '\0') {
+  }
+  remaining--;
   size_t idx = 0;
   while (remaining > 0) {
     ssize_t to_write = remaining < BUFFER_SIZE ? remaining : BUFFER_SIZE;
@@ -116,12 +120,12 @@ document_t *document_from_stream(int connfd) {
 }
 
 void handle_GET(document_t *request, int connfd) {
-  const char *target = fetch_body(request->header->request_line->target);
+  unsigned char *target = fetch_body(request->header->request_line->target);
 
   body_t *response_body = create_body(request->header->request_line->target);
   document_t *response_document =
       create_response(response_body ? OK : NOT_FOUND, response_body);
-  const char *response = serialize_document(response_document);
+  unsigned char *response = serialize_document(response_document);
   write_to_conn(connfd, response);
 }
 
@@ -130,6 +134,7 @@ void *handle_conn(void *arg) {
   free(arg);
   printf("client (id:%d) connected\n", connfd);
   document_t *request_document = document_from_stream(connfd);
+  printf("%d\n", request_document->header->request_line->method);
   switch (request_document->header->request_line->method) {
   case GET:
     handle_GET(request_document, connfd);
@@ -145,7 +150,7 @@ void *handle_conn(void *arg) {
   }
   close(connfd);
   printf("client(id:%d) disconnected\n", connfd);
-  return EXIT_SUCCESS;
+  return NULL;
 }
 
 int server() {

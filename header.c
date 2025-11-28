@@ -205,10 +205,10 @@ header_t *create_default_header() {
   return header;
 }
 
-const char *serialize_header(header_t *header) {
+unsigned char *serialize_header(header_t *header) {
   size_t capacity = BUFFER_SIZE;
   size_t len = 0;
-  char *output = malloc(capacity);
+  unsigned char *output = malloc(capacity);
   if (!output)
     return NULL;
   output[0] = '\0';
@@ -218,7 +218,7 @@ const char *serialize_header(header_t *header) {
     size_t slen = strlen(s);                                                   \
     if (len + slen + 1 > capacity) {                                           \
       capacity = (len + slen + 1) * 2;                                         \
-      char *tmp = realloc(output, capacity);                                   \
+      unsigned char *tmp = realloc(output, capacity);                          \
       if (!tmp) {                                                              \
         free(output);                                                          \
         return NULL;                                                           \

@@ -25,12 +25,16 @@ body_t *create_body(const char *target) {
   if (!body) {
     return NULL;
   }
-  const char *data = fetch_body(target);
+  unsigned char *data = fetch_body(target);
   if (!data) {
     return NULL;
   }
-  body->size = strlen(data);
-  body->data = strdup(data);
+  size_t size = 0;
+  while (data[size++] != '\0') {
+  }
+  body->size = size - 1;
+  body->data = malloc(body->size);
+  memcpy(body->data, data, size);
   if (!body->data) {
     free(body);
     return NULL;
@@ -38,4 +42,4 @@ body_t *create_body(const char *target) {
   return body;
 }
 
-const char *serialize_body(body_t *body) { return body->data; }
+unsigned char *serialize_body(body_t *body) { return body->data; }

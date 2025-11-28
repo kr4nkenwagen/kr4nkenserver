@@ -5,11 +5,11 @@
 
 typedef struct body {
   size_t size;
-  char *data;
+  unsigned char *data;
 } body_t;
 
 body_t *parse_body(const char *raw_body, size_t size);
 body_t *create_body(const char *target);
-const char *serialize_body(body_t *body);
+unsigned char *serialize_body(body_t *body);
 
 #endif // !BODY

@@ -100,7 +100,7 @@ document_t *create_response(RESPONSE_CODE_T code, body_t *body) {
   }
 }
 
-static char *load_file(const char *filepath) {
+static unsigned char *load_file(const char *filepath) {
   FILE *file = fopen(filepath, "rb");
   if (!file)
     return NULL;
@@ -111,7 +111,7 @@ static char *load_file(const char *filepath) {
     fclose(file);
     return NULL;
   }
-  char *content = malloc(file_size + 1);
+  unsigned char *content = malloc(file_size + 1);
   if (!content) {
     fclose(file);
     return NULL;
@@ -126,13 +126,13 @@ static char *load_file(const char *filepath) {
   return content;
 }
 
-const char *fetch_body(const char *target) {
+unsigned char *fetch_body(const char *target) {
   char path[BUFFER_SIZE];
   snprintf(path, BUFFER_SIZE, "%s%s", TARGET_DIRECTORY, target);
   if (target[strlen(target) - 1] == '/') {
     snprintf(path, sizeof(path), "%s%sindex.htm", TARGET_DIRECTORY, target);
   }
-  char *content = load_file(path);
+  unsigned char *content = load_file(path);
   if (content) {
     return content;
   }
