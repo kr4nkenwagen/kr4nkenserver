@@ -11,5 +11,6 @@ typedef struct body {
 body_t *parse_body(const char *raw_body, size_t size);
 body_t *create_body(const char *target);
 unsigned char *serialize_body(body_t *body);
+void destroy_body(body_t *body);
 
 #endif // !BODY

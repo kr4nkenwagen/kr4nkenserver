@@ -11,5 +11,6 @@ typedef struct document {
 
 document_t *create_document(header_t *header, body_t *body);
 unsigned char *serialize_document(document_t *document);
+void destroy_document(document_t *document);
 
 #endif // !DOCUMENT

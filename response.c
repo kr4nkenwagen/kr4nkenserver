@@ -1,6 +1,8 @@
 #include "config.h"
 #include "document.h"
 #include "header.h"
+#include "utils.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -100,39 +102,16 @@ document_t *create_response(RESPONSE_CODE_T code, body_t *body) {
   }
 }
 
-static unsigned char *load_file(const char *filepath) {
-  FILE *file = fopen(filepath, "rb");
-  if (!file)
-    return NULL;
-  fseek(file, 0, SEEK_END);
-  long file_size = ftell(file);
-  rewind(file);
-  if (file_size < 0) {
-    fclose(file);
-    return NULL;
-  }
-  unsigned char *content = malloc(file_size + 1);
-  if (!content) {
-    fclose(file);
-    return NULL;
-  }
-  size_t read_size = fread(content, 1, file_size, file);
-  fclose(file);
-  if (read_size != file_size) {
-    free(content);
-    return NULL;
-  }
-  content[file_size] = '\0';
-  return content;
-}
-
-unsigned char *fetch_body(const char *target) {
-  char path[BUFFER_SIZE];
-  snprintf(path, BUFFER_SIZE, "%s%s", TARGET_DIRECTORY, target);
+unsigned char *fetch_body(char *target) {
+  bool needs_malloc = false;
+  unsigned char *content;
   if (target[strlen(target) - 1] == '/') {
-    snprintf(path, sizeof(path), "%s%sindex.htm", TARGET_DIRECTORY, target);
+    char *target_root = str_join(target, "index.htm");
+    content = load_file(target_root);
+    free(target_root);
+  } else {
+    content = load_file(target);
   }
-  unsigned char *content = load_file(path);
   if (content) {
     return content;
   }

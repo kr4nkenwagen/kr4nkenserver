@@ -193,15 +193,13 @@ char *get_time() {
 header_t *create_default_header() {
   header_t *header = malloc(sizeof(header_t));
   header->request_line = NULL;
-  header->count = 6;
+  header->count = 5;
   header->items = malloc(header->count * sizeof(header_item_t *));
-  header->items[0] =
-      create_header_item("content-type", "text/html; charset=utf8");
-  header->items[1] = create_header_item("connection", "keep-alive");
-  header->items[2] = create_header_item("date", get_time());
-  header->items[3] = create_header_item("server", "kr4nkenserver");
-  header->items[4] = create_header_item("server-version", "0.1alpha");
-  header->items[5] = create_header_item("keep-alive", "timeout=5, max=997");
+  header->items[0] = create_header_item("connection", "keep-alive");
+  header->items[1] = create_header_item("date", get_time());
+  header->items[2] = create_header_item("server", "kr4nkenserver");
+  header->items[3] = create_header_item("server-version", "0.1alpha");
+  header->items[4] = create_header_item("keep-alive", "timeout=5, max=997");
   return header;
 }
 
@@ -337,4 +335,21 @@ header_t *parse_header(unsigned char *raw_header) {
   }
   combine_duplicate_header_items(header);
   return header;
+}
+
+void destroy_header(header_t *header) {
+  if (header->type == REQUEST) {
+    free(header->request_line->target);
+    free(header->request_line->version);
+    free(header->request_line);
+  }
+  if (header->type == RESPONSE) {
+    free(header->response_line);
+  }
+  for (int i = 0; i < header->count; i++) {
+    free(header->items[i]->key);
+    free(header->items[i]->value);
+    free(header->items[i]);
+  }
+  free(header);
 }

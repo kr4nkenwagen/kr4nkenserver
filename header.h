@@ -116,4 +116,5 @@ const char *get_response_code_string(RESPONSE_CODE_T code);
 void attach_header(header_t *header, header_item_t *item);
 header_response_line_t *create_response_line(RESPONSE_CODE_T code,
                                              char *version);
+void destroy_header(header_t *header);
 #endif // !HEADER

@@ -2,6 +2,7 @@
 #include "document.h"
 #include "header.h"
 #include "response.h"
+#include "utils.h"
 #include <arpa/inet.h>
 #include <asm-generic/socket.h>
 #include <netinet/in.h>
@@ -13,20 +14,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-size_t str_to_size_t(const char *s) {
-  char *end;
-  unsigned long long val = strtoull(s, &end, 10);
-  if (end == s) {
-    fprintf(stderr, "Invalid number: %s\n", s);
-    return 0;
-  }
-  if (val > (size_t)-1) {
-    fprintf(stderr, "Overflow converting '%s' to size_t\n", s);
-    return 0;
-  }
-  return (size_t)val;
-}
 
 ssize_t read_full(int fd, unsigned char *buf, size_t count) {
   size_t total_read = 0;
@@ -120,13 +107,24 @@ document_t *document_from_stream(int connfd) {
 }
 
 void handle_GET(document_t *request, int connfd) {
-  unsigned char *target = fetch_body(request->header->request_line->target);
-
-  body_t *response_body = create_body(request->header->request_line->target);
+  char *translated_target =
+      translate_target(request->header->request_line->target);
+  unsigned char *target = fetch_body(translated_target);
+  body_t *response_body = create_body(translated_target);
   document_t *response_document =
       create_response(response_body ? OK : NOT_FOUND, response_body);
+  char *file_type;
+  if (is_image_file(translated_target, &file_type)) {
+    attach_header(
+        response_document->header,
+        create_header_item("content-type", str_join("image/", file_type)));
+  } else {
+    attach_header(response_document->header,
+                  create_header_item("content-type", "text/html"));
+  }
   unsigned char *response = serialize_document(response_document);
   write_to_conn(connfd, response);
+  destroy_document(response_document);
 }
 
 void *handle_conn(void *arg) {
@@ -134,7 +132,6 @@ void *handle_conn(void *arg) {
   free(arg);
   printf("client (id:%d) connected\n", connfd);
   document_t *request_document = document_from_stream(connfd);
-  printf("%d\n", request_document->header->request_line->method);
   switch (request_document->header->request_line->method) {
   case GET:
     handle_GET(request_document, connfd);
@@ -148,6 +145,7 @@ void *handle_conn(void *arg) {
   case CONNECT:
     break;
   }
+  destroy_document(request_document);
   close(connfd);
   printf("client(id:%d) disconnected\n", connfd);
   return NULL;
