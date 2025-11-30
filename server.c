@@ -177,10 +177,16 @@ int server() {
     return EXIT_FAILURE;
   }
   while (1) {
-    connfd = accept(sockfd, NULL, NULL);
+    struct sockaddr_in conn_addr;
+    socklen_t addr_len = sizeof(conn_addr);
+    connfd = accept(sockfd, (struct sockaddr *)&addr, &addr_len);
     if (connfd < 0) {
       continue;
     }
+    char ipstr[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &conn_addr.sin_addr, ipstr, sizeof(ipstr));
+    printf("accepted connection from %s:%d\n", ipstr,
+           ntohs(conn_addr.sin_port));
     pthread_t tid;
     int *pconn = malloc(sizeof(int));
     *pconn = connfd;
