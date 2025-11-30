@@ -29,11 +29,15 @@ static char *get_file_extension(char *path) {
   char *out = calloc(BUFFER_SIZE, 1);
   for (int idx = strlen(path); idx > 0; idx--) {
     if (path[idx] == '.') {
+      if (idx == strlen(path)) {
+        break;
+      }
+      out = strdup(path + idx + 1);
       break;
-      out = strdup(path + idx);
     }
     if (path[idx] == '/') {
       out = "html";
+      break;
     }
   }
   return out;
