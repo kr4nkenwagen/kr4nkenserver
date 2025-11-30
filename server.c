@@ -111,7 +111,6 @@ void handle_GET(document_t *request, int connfd) {
   document_t *response_document =
       create_response(response_body ? OK : NOT_FOUND, response_body);
   char *file_type;
-  printf("%s\n", serialize_header(request->header));
   if (is_image_file(translated_target, &file_type)) {
     attach_header(
         response_document->header,

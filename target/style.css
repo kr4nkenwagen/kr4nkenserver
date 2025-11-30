@@ -20,6 +20,7 @@
   --white: #F6F5DD;
 }
 
+body { background-color: red !important; }
 /* Reset & global styles */
 * {
   margin: 0;
@@ -193,4 +194,3 @@ footer {
   background-color: var(--black);
   color: var(--foreground);
 }
-
