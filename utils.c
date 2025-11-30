@@ -28,7 +28,7 @@ static bool starts_with(const unsigned char *buf, const char *str, size_t n) {
 static char *get_file_extension(char *path) {
   char *out = calloc(BUFFER_SIZE, 1);
   for (int idx = strlen(path); idx > 0; idx--) {
-    puts(&path[idx]);
+    putc(path[idx], stdout);
     if (path[idx] == '.') {
       if (idx == strlen(path)) {
         break;
