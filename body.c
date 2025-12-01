@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-body_t *parse_body(const char *raw_body, size_t size) {
+body_t *parse_body(unsigned char *raw_body, size_t size) {
   body_t *body = malloc(sizeof(body_t));
   if (body == NULL) {
     return NULL;

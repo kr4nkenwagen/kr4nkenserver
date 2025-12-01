@@ -27,7 +27,6 @@ ssize_t read_full(int fd, unsigned char *buf, size_t count) {
 }
 
 int write_to_conn(int connfd, unsigned char *data, size_t length) {
-
   size_t remaining = length;
   size_t idx = 0;
   while (remaining > 0) {
@@ -94,7 +93,7 @@ document_t *document_from_stream(int connfd) {
         if (remaining < body_size) {
           read_full(connfd, raw_body + remaining, body_size - remaining);
         }
-        body = parse_body((const char *)raw_body, body_size);
+        body = parse_body(raw_body, body_size);
         free(raw_body);
       }
     }
@@ -104,6 +103,34 @@ document_t *document_from_stream(int connfd) {
 }
 
 void handle_GET(document_t *request, int connfd) {
+  char *translated_target =
+      translate_target(request->header->request_line->target);
+  unsigned char *target = fetch_body(translated_target);
+  body_t *response_body = create_body(translated_target);
+  document_t *response_document =
+      create_response(response_body ? OK : NOT_FOUND, response_body);
+  char *file_type;
+  if (is_image_file(translated_target, &file_type)) {
+    attach_header(
+        response_document->header,
+        create_header_item("content-type", str_join("image/", file_type)));
+  } else if (strcmp(file_type, "html") == 0 || strcmp(file_type, "htm") == 0) {
+    attach_header(response_document->header,
+                  create_header_item("content-type", "text/html"));
+  } else if (strcmp(file_type, "css") == 0) {
+    attach_header(response_document->header,
+                  create_header_item("content-type", "text/css"));
+  } else if (strcmp(file_type, "js") == 0) {
+    attach_header(response_document->header,
+                  create_header_item("content-type", "application/javascript"));
+  }
+  size_t size = 0;
+  unsigned char *response = serialize_document(response_document, &size);
+  write_to_conn(connfd, response, size);
+  destroy_document(response_document);
+}
+
+void handle_POST(document_t *request, int connfd) {
   char *translated_target =
       translate_target(request->header->request_line->target);
   unsigned char *target = fetch_body(translated_target);
@@ -141,6 +168,8 @@ void *handle_conn(void *arg) {
     handle_GET(request_document, connfd);
     break;
   case POST:
+    handle_POST(request_document, connfd);
+    break;
   case OPTIONS:
   case HEAD:
   case PUT:
