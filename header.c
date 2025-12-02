@@ -452,6 +452,7 @@ header_t *parse_header(unsigned char *raw_header) {
  * @param header The header object to destroy.
  */
 void destroy_header(header_t *header) {
+  printf("%s\n", serialize_header(header));
   if (header->type == REQUEST) {
     free(header->request_line->target);
     free(header->request_line->version);
