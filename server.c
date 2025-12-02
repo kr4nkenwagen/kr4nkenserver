@@ -64,7 +64,6 @@ int write_to_conn(int connfd, unsigned char *data, size_t length) {
   return 0;
 }
 
-```
 /**
  * @brief Reads an HTTP request from the given socket and returns a document object.
  *
