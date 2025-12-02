@@ -367,7 +367,6 @@ header_response_line_t *create_response_line(RESPONSE_CODE_T code,
     return NULL;
   }
   strcpy(response_line->version, version);
-  response_line->version = version;
   response_line->code = code;
   return response_line;
 }
@@ -459,6 +458,7 @@ void destroy_header(header_t *header) {
     free(header->request_line);
   }
   if (header->type == RESPONSE) {
+    free(header->response_line->version);
     free(header->response_line);
   }
   for (int i = 0; i < header->count; i++) {
