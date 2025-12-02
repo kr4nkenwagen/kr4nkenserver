@@ -78,6 +78,15 @@ static void str_to_upper(char *s) {
   }
 }
 
+/**
+ * @brief Get the string representation of a request method.
+ *
+ * This function returns the string representation of a given request method. The possible values for the method are GET, POS
+POST, PUT, OPTIONS, HEAD, CONNECT, TRACE, and DELETE.
+ *
+ * @param method The request method to get the string representation of.
+ * @return The string representation of the request method.
+ */
 const char *get_method_string(REQUEST_METHOD_T method) {
   switch (method) {
   case GET:
@@ -99,6 +108,15 @@ const char *get_method_string(REQUEST_METHOD_T method) {
   }
 }
 
+/**
+ * @brief Gets a string representation of the response code.
+ *
+ * The function takes an integer value representing the response code and returns a string containing the name of the code.
+ * If the input is not a valid response code, the function will return "Unknown Code".
+ *
+ * @param code The response code to get the string representation for.
+ * @return A string containing the name of the response code, or "Unknown Code" if the input is not a valid code.
+ */
 const char *get_response_code_string(RESPONSE_CODE_T code) {
   if (code < 100 || code > 511)
     return "Unknown Code";
@@ -142,6 +160,16 @@ static int find_header_count(unsigned char *raw_header) {
   return count - 1;
 }
 
+/**
+ * @brief Finds a header item in the given header by its name.
+ *
+ * The function searches for a header item with the specified name in the given header structure. If an item with that name i
+is found, it is returned. Otherwise, NULL is returned.
+ *
+ * @param header The header structure to search in.
+ * @param name The name of the header item to find.
+ * @return The found header item, or NULL if not found.
+ */
 header_item_t *get_header_item(header_t *header, char *name) {
   for (int i = 0; i < header->count; i++) {
     if (strcmp(header->items[i]->key, name) == 0) {
@@ -151,6 +179,16 @@ header_item_t *get_header_item(header_t *header, char *name) {
   return NULL;
 }
 
+/**
+ * @brief Attaches a header item to the end of the header list.
+ *
+ * This function attaches a header item to the end of the header list, which is a linked list of header items. The function t
+takes two arguments: a pointer to the header list and a pointer to the header item to be attached.
+ *
+ * @param header A pointer to the header list.
+ * @param item A pointer to the header item to be attached.
+ * @return Nothing.
+ */
 void attach_header(header_t *header, header_item_t *item) {
   header->items =
       realloc(header->items, (header->count + 1) * sizeof(header_item_t *));
@@ -161,6 +199,16 @@ void attach_header(header_t *header, header_item_t *item) {
   header->count++;
 }
 
+/**
+ * @brief Creates a new header item with the given key and value.
+ *
+ * This function creates a new header item with the specified key and value. The key and value are copied, so they can be fre
+freed after this function returns.
+ *
+ * @param key The key for the header item.
+ * @param value The value for the header item.
+ * @return A pointer to the newly created header item. NULL is returned if an error occurs.
+ */
 header_item_t *create_header_item(char *key, char *value) {
   header_item_t *item = malloc(sizeof(header_item_t));
   if (!item) {
@@ -177,6 +225,15 @@ header_item_t *create_header_item(char *key, char *value) {
   return item;
 }
 
+/**
+ * @brief Get the current time in UTC/GMT format.
+ *
+ * This function returns a string representation of the current time in UTC/GMT format. The returned string is allocated on t
+the heap using `calloc()`, and it is the responsibility of the caller to free the memory when it is no longer needed.
+ *
+ * @param none
+ * @return A string representing the current time in UTC/GMT format.
+ */
 char *get_time() {
   time_t now = time(NULL);
   struct tm gmt;
@@ -190,6 +247,15 @@ char *get_time() {
 
   return buf;
 }
+
+/**
+ * @brief Creates a default HTTP header.
+ *
+ * This function creates a default HTTP header that includes essential headers such as "Connection", "Date", "Server", and "K
+"Keep-Alive". The "Connection" header is set to "keep-alive" and the "Keep-Alive" header is set to "timeout=5, max=997".
+ *
+ * @return A pointer to a `header_t` structure containing the default HTTP header.
+ */
 header_t *create_default_header() {
   header_t *header = malloc(sizeof(header_t));
   header->request_line = NULL;
@@ -203,6 +269,18 @@ header_t *create_default_header() {
   return header;
 }
 
+/**
+ * @brief Serialize a header structure into a binary buffer.
+ *
+ * The serialized buffer contains the following fields in the order specified:
+ * - The method, target, and version of the request line (if type is REQUEST).
+ * - The HTTP version and status code of the response line (if type is RESPONSE).
+ * - Each header item in the list, in the format "key: value\r\n".
+ * - A final newline character ("\r\n").
+ *
+ * @param header The header structure to serialize.
+ * @return The serialized binary buffer, or NULL if an error occurred.
+ */
 unsigned char *serialize_header(header_t *header) {
   size_t capacity = BUFFER_SIZE;
   size_t len = 0;
@@ -255,6 +333,15 @@ unsigned char *serialize_header(header_t *header) {
   return output;
 }
 
+/**
+ * @brief Creates a new header response line with the given version and code.
+ *
+ * The created response line is returned, or NULL if an error occurred.
+ *
+ * @param version The version of the HTTP protocol to use in the response line.
+ * @param code The response code to use in the response line.
+ * @return The newly created header response line.
+ */
 header_response_line_t *create_response_line(RESPONSE_CODE_T code,
                                              char *version) {
   header_response_line_t *response_line =
@@ -301,6 +388,15 @@ static void combine_duplicate_header_items(header_t *header) {
   }
 }
 
+/**
+ * @brief Parse HTTP header from raw data.
+ *
+ * This function parses an HTTP header from a block of raw data and returns a
+ * header struct with all the parsed information.
+ *
+ * @param raw_header A pointer to the raw header data.
+ * @return The parsed header struct.
+ */
 header_t *parse_header(unsigned char *raw_header) {
   header_t *header = malloc(sizeof(header_t));
   header->count = find_header_count(raw_header);
@@ -334,6 +430,14 @@ header_t *parse_header(unsigned char *raw_header) {
   return header;
 }
 
+/**
+ * @brief Destroys a HTTP header object.
+ *
+ * This function destroys a HTTP header object, including its request or response line and any items.
+ * The memory allocated for the header is also freed.
+ *
+ * @param header The header object to destroy.
+ */
 void destroy_header(header_t *header) {
   if (header->type == REQUEST) {
     free(header->request_line->target);

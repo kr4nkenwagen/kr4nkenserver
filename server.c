@@ -15,6 +15,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+/**
+ * @brief Reads exactly `count` bytes from the file descriptor `fd` into the buffer `buf`.
+ *
+ * This function reads as many bytes as necessary to fill the entire buffer, or until an error occurs. It returns the total n
+number of bytes read.
+ *
+ * @param fd The file descriptor to read from.
+ * @param buf The buffer to read into.
+ * @param count The maximum number of bytes to read.
+ * @return The total number of bytes read, or a negative value on error.
+ */
 ssize_t read_full(int fd, unsigned char *buf, size_t count) {
   size_t total_read = 0;
   while (total_read < count) {
@@ -26,6 +37,17 @@ ssize_t read_full(int fd, unsigned char *buf, size_t count) {
   return total_read;
 }
 
+/**
+ * @brief Write data to an open connection.
+ *
+ * This function writes data to an open connection, starting at the given file descriptor. It takes a buffer of unsigned char
+chars and a length in bytes as input, and returns -1 on error or the number of bytes written if successful.
+ *
+ * @param connfd The file descriptor for the open connection.
+ * @param data The buffer containing the data to write.
+ * @param length The length of the data buffer in bytes.
+ * @return The number of bytes written, or -1 on error.
+ */
 int write_to_conn(int connfd, unsigned char *data, size_t length) {
   size_t remaining = length;
   size_t idx = 0;
@@ -42,6 +64,16 @@ int write_to_conn(int connfd, unsigned char *data, size_t length) {
   return 0;
 }
 
+```
+/**
+ * @brief Reads an HTTP request from the given socket and returns a document object.
+ *
+ * This function reads data from the socket until it receives a complete HTTP request. It then parses the request into its
+header and body parts, and returns a document object that represents the entire request.
+ *
+ * @param connfd The socket file descriptor.
+ * @return A document object representing the received HTTP request.
+ */
 document_t *document_from_stream(int connfd) {
   unsigned char buffer[BUFFER_SIZE];
   size_t raw_header_size = 0;
@@ -102,6 +134,15 @@ document_t *document_from_stream(int connfd) {
   return create_document(header, body);
 }
 
+/**
+ * @brief Handle a GET request
+ *
+ * This function handles a GET request by translating the target URL into a file path, fetching the contents of that file, an
+and then creating a response document with the appropriate content type and sending it back to the client.
+ *
+ * @param request The request document
+ * @param connfd The connection socket file descriptor
+ */
 void handle_GET(document_t *request, int connfd) {
   char *translated_target =
       translate_target(request->header->request_line->target);
@@ -130,6 +171,18 @@ void handle_GET(document_t *request, int connfd) {
   destroy_document(response_document);
 }
 
+/**
+ * @brief Handles HTTP POST requests
+ *
+ * Handles HTTP POST requests by creating a new document and writing it to the connection.
+ * The document contains the response body, which is generated based on the target of the request.
+ * If the target is an image file, the content type is set to `image/<file_type>`.
+ * If the target is an HTML or CSS file, the content type is set to `text/html` and `text/css`, respectively.
+ * If the target is a JavaScript file, the content type is set to `application/javascript`.
+ *
+ * @param request The HTTP POST request document
+ * @param connfd The connection file descriptor
+ */
 void handle_POST(document_t *request, int connfd) {
   char *translated_target =
       translate_target(request->header->request_line->target);
@@ -158,6 +211,16 @@ void handle_POST(document_t *request, int connfd) {
   destroy_document(response_document);
 }
 
+/**
+ * @brief Handles a connection request from a client.
+ *
+ * This function accepts an incoming connection from a client and processes it accordingly. It reads the request document fro
+from the socket, determines the request method, and calls the appropriate handler function to handle the request. Once the re
+response has been sent back to the client, the function closes the socket and returns.
+ *
+ * @param arg A pointer to an integer representing the connection file descriptor.
+ * @return NULL
+ */
 void *handle_conn(void *arg) {
   int connfd = *(int *)arg;
   free(arg);
@@ -184,6 +247,15 @@ void *handle_conn(void *arg) {
   return NULL;
 }
 
+/**
+ * @brief Sets up a server socket and listens on a specific port
+ *
+ * This function creates a server socket and binds it to a specific port. It then enters a loop where it waits for incoming c
+connections and handles them in a separate thread.
+ *
+ * @param PORT The port number to listen on
+ * @return EXIT_SUCCESS if the server was successfully set up, or EXIT_FAILURE if an error occurred
+ */
 int server() {
   printf("Starting server...\n");
   printf("Listening to port %d\n", PORT);

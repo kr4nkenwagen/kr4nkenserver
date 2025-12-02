@@ -31,9 +31,15 @@ static document_t *create_NOT_FOUND_document() {
   return document;
 }
 
+/**
+ * @brief Creates a response document based on the given code and body.
+ *
+ * @param code The response code.
+ * @param body The response body.
+ * @return A pointer to the created response document.
+ */
 document_t *create_response(RESPONSE_CODE_T code, body_t *body) {
   switch (code) {
-
   case OK:
     return create_OK_document(body);
   case NOT_FOUND:
@@ -101,6 +107,15 @@ document_t *create_response(RESPONSE_CODE_T code, body_t *body) {
   }
 }
 
+/**
+ * @brief Fetches the contents of a web page and returns it as a string.
+ *
+ * This function takes in a URL as input, fetches the contents of the web page, and returns it as a string. If the URL does n
+not point to an existing web page, it will return NULL.
+ *
+ * @param target The URL of the web page to be fetched.
+ * @return The contents of the web page as a string, or NULL if the URL does not point to an existing web page.
+ */
 unsigned char *fetch_body(char *target) {
   bool needs_malloc = false;
   unsigned char *content;
