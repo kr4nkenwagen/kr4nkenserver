@@ -1,10 +1,10 @@
 #include "header.h"
 #include "config.h"
+#include "utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 const char *RESPONSE_CODE_STRINGS[] = {
     [CONTINUE] = "Continue",
@@ -229,31 +229,6 @@ header_item_t *create_header_item(char *key, char *value) {
     return NULL;
   }
   return item;
-}
-
-/**
- * @brief Get the current time in UTC/GMT format.
- *
- * This function returns a string representation of the current time in UTC/GMT
-format. The returned string is allocated on t the heap using `calloc()`, and it
-is the responsibility of the caller to free the memory when it is no longer
-needed.
- *
- * @param none
- * @return A string representing the current time in UTC/GMT format.
- */
-char *get_time() {
-  time_t now = time(NULL);
-  struct tm gmt;
-  gmtime_r(&now, &gmt); // convert to UTC / GMT
-
-  char *buf = calloc(100, 1);
-  if (!buf) {
-    return "";
-  }
-  strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &gmt);
-
-  return buf;
 }
 
 /**

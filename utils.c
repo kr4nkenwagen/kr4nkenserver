@@ -1,17 +1,43 @@
-
 #include "config.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /**
- * @brief Translates a target name into its corresponding path in the target directory.
+ * @brief Get the current time in UTC/GMT format.
  *
- * This function takes a target name as input and returns its corresponding path in the target directory.
- * The target directory is defined by the TARGET_DIRECTORY constant, which should be set to the desired directory where targe
-targets are stored.
+ * This function returns a string representation of the current time in UTC/GMT
+format. The returned string is allocated on t the heap using `calloc()`, and it
+is the responsibility of the caller to free the memory when it is no longer
+needed.
+ *
+ * @param none
+ * @return A string representing the current time in UTC/GMT format.
+ */
+char *get_time() {
+  time_t now = time(NULL);
+  struct tm gmt;
+  gmtime_r(&now, &gmt); // convert to UTC / GMT
+  char *buf = calloc(100, 1);
+  if (!buf) {
+    return "";
+  }
+  strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &gmt);
+
+  return buf;
+}
+
+/**
+ * @brief Translates a target name into its corresponding path in the target
+directory.
+ *
+ * This function takes a target name as input and returns its corresponding path
+in the target directory.
+ * The target directory is defined by the TARGET_DIRECTORY constant, which
+should be set to the desired directory where targe targets are stored.
  *
  * @param target Name of the target to be translated.
  * @return Translated path of the target in the target directory.
@@ -25,7 +51,8 @@ char *translate_target(char *target) {
 /**
  * @brief Gets the size of a file in bytes.
  *
- * This function opens a file and returns its size in bytes. If the file cannot be opened or does not exist, it returns 0.
+ * This function opens a file and returns its size in bytes. If the file cannot
+ * be opened or does not exist, it returns 0.
  *
  * @param filepath The path to the file whose size needs to be obtained.
  * @return The size of the file in bytes.
@@ -64,8 +91,9 @@ static char *get_file_extension(char *path) {
 /**
  * @brief Determine if a file is an image file
  *
- * This function checks if a given file is an image file by looking at its magic number.
- * The function returns true if the file is an image file, false otherwise.
+ * This function checks if a given file is an image file by looking at its magic
+ * number. The function returns true if the file is an image file, false
+ * otherwise.
  *
  * @param path The path to the file
  * @return True if the file is an image file, false otherwise
@@ -149,9 +177,9 @@ bool is_image_file(char *path, char **out) {
 /**
  * @brief Loads the contents of a file into memory.
  *
- * This function reads the contents of a file into memory and returns a pointer to
- * the data. The caller is responsible for freeing the memory using the `free()`
- * function.
+ * This function reads the contents of a file into memory and returns a pointer
+ * to the data. The caller is responsible for freeing the memory using the
+ * `free()` function.
  *
  * @param filepath The path to the file to load.
  * @return A pointer to the data in memory, or NULL if there was an error.
@@ -185,9 +213,10 @@ unsigned char *load_file(const char *filepath) {
 /**
  * @brief Convert a string to a size_t value.
  *
- * This function converts a string representation of a number to an unsigned integer. The string is
- * assumed to be in base 10. If the conversion fails or the resulting value is greater than the maximum
- * value that can be represented by a size_t, the function returns 0.
+ * This function converts a string representation of a number to an unsigned
+ * integer. The string is assumed to be in base 10. If the conversion fails or
+ * the resulting value is greater than the maximum value that can be represented
+ * by a size_t, the function returns 0.
  *
  * @param s Pointer to the string to convert.
  * @return The converted value on success, 0 on failure.
@@ -209,7 +238,8 @@ size_t str_to_size_t(const char *s) {
 /**
  * @brief Joins two strings together.
  *
- * The resulting string will contain a concatenation of the two input strings, separated by a single space.
+ * The resulting string will contain a concatenation of the two input strings,
+ * separated by a single space.
  *
  * @param a First string to join.
  * @param b Second string to join.

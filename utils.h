@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+char *get_time();
 char *translate_target(char *target);
 size_t file_size(char *filepath);
 bool is_image_file(char *path, char **out);
