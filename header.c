@@ -448,15 +448,19 @@ header_t *parse_header(unsigned char *raw_header) {
  */
 void destroy_header(header_t *header) {
   if (header->type == REQUEST) {
-    if (header->request_line->target) {
-      free(header->request_line->target);
+    if (header->request_line) {
+      if (header->request_line->target) {
+        free(header->request_line->target);
+      }
+      free(header->request_line->version);
+      free(header->request_line);
     }
-    free(header->request_line->version);
-    free(header->request_line);
   }
   if (header->type == RESPONSE) {
-    free(header->response_line->version);
-    free(header->response_line);
+    if (header->request_line) {
+      free(header->response_line->version);
+      free(header->response_line);
+    }
   }
   for (int i = 0; i < header->count; i++) {
     free(header->items[i]->key);
