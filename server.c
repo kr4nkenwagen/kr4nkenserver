@@ -115,6 +115,10 @@ document_t *document_from_stream(int connfd) {
       raw_header_size += header_end;
       raw_header[raw_header_size] = '\0';
       header_complete = 1;
+      if (strlen((const char *)raw_header) < 10) {
+        free(raw_header);
+        return NULL;
+      }
       header = parse_header(raw_header);
       header_item_t *content_length = get_header_item(header, "CONTENT-LENGTH");
       if (content_length) {
