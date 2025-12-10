@@ -160,6 +160,10 @@ void handle_GET(document_t *request, int connfd) {
       create_response(response_body ? OK : NOT_FOUND, response_body);
   char *file_type;
   if (is_image_file(translated_target, &file_type)) {
+    if (!file_type) {
+      destroy_document(response_document);
+      return;
+    }
     attach_header(
         response_document->header,
         create_header_item("content-type", str_join("image/", file_type)));
