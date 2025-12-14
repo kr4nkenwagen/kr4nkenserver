@@ -67,9 +67,18 @@ should be set to the desired directory where targe targets are stored.
  * @param target Name of the target to be translated.
  * @return Translated path of the target in the target directory.
  */
-char *translate_target(char *target) {
-  char *translated_target = malloc(strlen(target) + strlen(TARGET_DIRECTORY));
-  snprintf(translated_target, BUFFER_SIZE, "%s%s", TARGET_DIRECTORY, target);
+char *translate_target(const char *target) {
+  if (!target) {
+    return NULL;
+  }
+  size_t len = strlen(TARGET_DIRECTORY) + strlen(target) + 1;
+  char *translated_target = malloc(len);
+  if (!translated_target) {
+    return NULL;
+  }
+  translated_target[0] = '\0';
+  strncat(translated_target, TARGET_DIRECTORY, len - 1);
+  strncat(translated_target, target, len - strlen(translated_target) - 1);
   return translated_target;
 }
 
